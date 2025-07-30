@@ -1,6 +1,6 @@
 import { useDispatch } from "react-redux";
 import { useState } from "react";
-import { setQuestionInfo } from "./registerSlice";
+import { setBasicInfo } from "./registerSlice";
 import { useQuestions } from "./useQuestions";
 
 export default function QuestionFlowForm({ onNext }) {
@@ -25,7 +25,7 @@ export default function QuestionFlowForm({ onNext }) {
     setError("");
 
     if (index === questions.length - 1) {
-      dispatch(setQuestionInfo(updated));
+      dispatch(setBasicInfo(updated));
       onNext(); // call parent to go to CredentialForm
     } else {
       setIndex(index + 1);

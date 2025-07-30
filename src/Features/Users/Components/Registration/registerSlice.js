@@ -18,11 +18,6 @@ const registerSlice = createSlice({
       localStorage.setItem("basicInfo", JSON.stringify(action.payload));
     },
 
-    // Sets user's answers to dynamic questions
-    setQuestionInfo: (state, action) => {
-      state.questionInfo = action.payload;
-    },
-
     // Sets psychologist-specific form details
     setPsychologistDetails: (state, action) => {
       state.psychologistDetails = action.payload;

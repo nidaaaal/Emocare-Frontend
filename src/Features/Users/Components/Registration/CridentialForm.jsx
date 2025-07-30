@@ -7,13 +7,12 @@ import { userCredentialSchema } from "../../../../Utils/Validation";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
-export default function CredentialForm({ isPsychologist = false }) {
-  const dispatch = useDispatch();
+export default function CredentialForm({ isPsychologist = false, licenseCopy }) {
+    const dispatch = useDispatch();
   const basicInfo = useSelector((state) => state.userReg.basicInfo);
-  const questionInfo = useSelector((state) => state.userReg.questionInfo);
   const psychologistDetails = useSelector((state) => state.userReg.psychologistDetails);
   const [submitted, setSubmitted] = useState(false);
-const novigate = useNavigate();
+  const novigate = useNavigate();
   const formik = useFormik({
     initialValues: {
       EmailAddress: "",
@@ -21,36 +20,66 @@ const novigate = useNavigate();
       ConfirmPassword: "",
     },
     validationSchema:userCredentialSchema,
-    onSubmit: async (values) => {
+       onSubmit: async (values) => {
       dispatch(setCredentials(values));
-
-      const payload = {
-        ...basicInfo,
-        ...questionInfo,
-        ...values,
-        ...(isPsychologist ? psychologistDetails : {}),
-      };
-
+      
       try {
         const endpoint = isPsychologist
-          ? "/authentication/register/psychologist"
-          : "/authentication/register/user";
-          console.log(payload)
-        const res = await api.post(endpoint, payload);
+          ? "psychologist/register"
+          : "/users/register";
 
+        let res;
+
+                   if (isPsychologist) {
+              const formData = new FormData();
+                  
+              const allFields = {
+                ...basicInfo,
+                ...psychologistDetails,
+                ...values,
+              };
+                            console.table(basicInfo);
+
+
+              console.table(allFields);
+              
+            
+              Object.entries(allFields).forEach(([key, value]) => {
+                // Always send empty string instead of null/undefined
+                formData.append(key, value !== null && value !== undefined ? String(value) : "");
+              });
+            
+              if (licenseCopy) {
+                formData.append("UploadLicense", licenseCopy);
+              }
+            
+              res = await api.post(endpoint, formData, {
+                headers: {
+                  "Content-Type": "multipart/form-data",
+                },
+              });
+            }
+
+       else {
+          const payload = {
+            ...basicInfo,
+            ...values,
+          };
+
+          console.table(payload);
+          
+        
+          res = await api.post(endpoint, payload);
+        }
+      
         if (res.data.success) {
           setSubmitted(true);
-          console.table(res.data);
-    const logindata = {
-       EmailAddress: values.EmailAddress,
-      Password: values.Password
-    }
           dispatch(clearRegistration());
           localStorage.removeItem("basicInfo");
-          toast.success(res.data.message)
-          navigator('/');
+          toast.success(res.data.message);
+          novigate("/");
         } else {
-          toast.error(res.data.message)
+          toast.error(res.data.message);
         }
       } catch (err) {
         console.table(err?.response?.data?.message || "Something went wrong.");
