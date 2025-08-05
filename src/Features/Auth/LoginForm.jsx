@@ -25,6 +25,9 @@ const LoginForm = () => {
           name: result.data.fullName,
           role: result.data.role,
         }));
+                
+        localStorage.setItem("chattoken", result.data.signalRToken)
+              
 
         toast.success(result.message);
 

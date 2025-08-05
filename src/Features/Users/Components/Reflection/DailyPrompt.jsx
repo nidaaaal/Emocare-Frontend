@@ -32,7 +32,9 @@ export default function DailyCheckIn({ onSuccess }) {
 }
 
     try {
-      const res = await api.post('/reflection/Daily',payload);
+      const res = await api.post('/reflection/Daily',payload,{
+        withCredentials:true
+      });
 
       if (res.data.success) {
         toast.success("Reflection submitted!");

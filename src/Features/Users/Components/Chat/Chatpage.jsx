@@ -10,64 +10,86 @@ export default function ChatPage() {
   const [currentAIMessage, setCurrentAIMessage] = useState('');
   const [chatMode, setChatMode] = useState('emotional');
   const bottomRef = useRef(null);
-  const token = localStorage.getItem("token");
 
-  // Scroll to bottom on chatLog update
+  // Token loader from localStorage
+  const getStoredToken = () => localStorage.getItem('chattoken');
+
+  // Token refresher
+  const fetchNewToken = async () => {
+    try {
+      const res = await api.post('/authentication/signalRToken');
+      const newToken = res.data?.data;
+      if (newToken) {
+        localStorage.setItem('chattoken', newToken);
+        return newToken;
+      }
+    } catch (error) {
+      console.error('Failed to refresh token', error);
+    }
+    return null;
+  };
+
+  // Scroll to bottom on new chat message
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatLog]);
 
   useEffect(() => {
-    if (!token) {
-      console.warn("Token not found. Cannot connect to chat hub.");
-      return;
-    }
+    const connect = async () => {
+      let token = getStoredToken();
 
-    const newConnection = new signalR.HubConnectionBuilder()
-      .withUrl("https://localhost:7237/chathub", {
-        accessTokenFactory: () => token,
-      })
-      .withAutomaticReconnect()
-      .build();
-
-    const fetchHistoryAndConnect = async () => {
-      try {
-        const res = (await api.get("/chat/message")).data;
-        setChatLog(res.data || []);
-      } catch (err) {
-        console.error("Error fetching chat history", err);
+      if (!token) {
+        token = await fetchNewToken();
+        if (!token) return;
       }
 
-      try {
-        await newConnection.start();
-        console.log("✅ Connected to chat hub");
+      const newConnection = new signalR.HubConnectionBuilder()
+        .withUrl("https://localhost:7237/chathub", {
+          accessTokenFactory: () => token
+        })
+        .withAutomaticReconnect()
+        .build();
 
-        newConnection.on("ReceiveMessage", (chunk) => {
-          setCurrentAIMessage(prev => {
-            const combined = (prev + chunk)
-              .replace(/\b(\w+)[\s,.!?]*\1\b/gi, '$1')
-              .replace(/[ \t]+\n/g, '\n')
-              .replace(/\n{3,}/g, '\n\n')
-              .replace(/[^\S\r\n]+/g, ' ')
-              .replace(/ ?([.,!?]) ?/g, '$1 ')
-              .replace(/\s+$/, '')
-              .trim();
-            return combined;
+      const fetchHistoryAndConnect = async () => {
+        try {
+          const res = await api.get("/chat/message");
+          setChatLog(res.data?.data || []);
+        } catch (err) {
+          console.error("Error fetching chat history", err);
+        }
+
+        try {
+          await newConnection.start();
+          console.log("✅ Connected to chat hub");
+
+          newConnection.on("ReceiveMessage", (chunk) => {
+            setCurrentAIMessage(prev => (
+              (prev + chunk).replace(/\b(\w+)[\s,.!?]+\1\b/gi, '$1')
+            ));
           });
-        });
 
-        setConnection(newConnection);
-      } catch (err) {
-        console.error("❌ SignalR connection failed:", err);
-      }
+          setConnection(newConnection);
+        } catch (err) {
+          console.error("❌ SignalR connection failed:", err);
+
+          if (err?.message?.includes("Unauthorized") || err?.statusCode === 401) {
+            const refreshed = await fetchNewToken();
+            if (refreshed) {
+              window.location.reload(); // Or recall connect() if you prefer no full reload
+            }
+          }
+        }
+      };
+
+      await fetchHistoryAndConnect();
+
+      return () => {
+        newConnection.stop();
+      };
     };
 
-    fetchHistoryAndConnect();
-
-    return () => {
-      newConnection.stop();
-    };
-  }, [token]);
+    connect();
+  }, []);
 
   useEffect(() => {
     if (!currentAIMessage) return;
@@ -77,16 +99,12 @@ export default function ChatPage() {
       const last = updated[updated.length - 1];
 
       if (!last || last.role !== 'AI') {
-        updated.push({
-          role: 'AI',
-          message: currentAIMessage,
-          mode: chatMode,
-        });
+        updated.push({ role: 'AI', message: currentAIMessage, mode: chatMode });
       } else {
         updated[updated.length - 1] = {
           ...last,
           message: currentAIMessage,
-          mode: chatMode,
+          mode: chatMode
         };
       }
 
