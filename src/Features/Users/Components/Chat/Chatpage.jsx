@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import * as signalR from '@microsoft/signalr';
 import api from '../../../../Api/baseurl';
-import Chat from './Index';
+import Chat from '../Chat/Index';
 
 export default function ChatPage() {
   const [connection, setConnection] = useState(null);

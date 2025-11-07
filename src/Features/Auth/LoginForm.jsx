@@ -8,6 +8,8 @@ import { loginValidationSchema } from '../../Utils/Validation';
 import AccountTypeModal from './AccountTypeModal';
 import { toast } from 'react-toastify';
 import ForgotPassword from './ForgotPassword';
+import loginIllustration from '../../assets/Images/heroSection/login.png'; // add your SVG/PNG here
+import Navbar from '../../assets/Components/Navbar';
 
 const LoginForm = () => {
   const dispatch = useDispatch();
@@ -20,15 +22,15 @@ const LoginForm = () => {
     try {
       const result = await dispatch(loginUser(values)).unwrap();
       if (result.success) {
-        localStorage.setItem("userdata", JSON.stringify({
-          userid: result.data.id,
-          name: result.data.fullName,
-          role: result.data.role,
-        }));
-                
-        localStorage.setItem("chattoken", result.data.signalRToken)
-              
-
+        localStorage.setItem(
+          'userdata',
+          JSON.stringify({
+            userid: result.data.id,
+            name: result.data.fullName,
+            role: result.data.role,
+          })
+        );
+        localStorage.setItem('chattoken', result.data.signalRToken);
         toast.success(result.message);
 
         if (result?.data.isUser) navigate('/user/home');
@@ -46,71 +48,134 @@ const LoginForm = () => {
 
   const handleAccountSelect = (type) => {
     setShowModal(false);
-    if (type === "user") navigate("/user/register");
-    else if (type === "psychologist") navigate("/psy/register");
+    if (type === 'user') navigate('/user/register');
+    else if (type === 'psychologist') navigate('/psy/register');
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-md">
-        <h2 className="text-2xl font-bold text-center mb-6">Login to Emocare</h2>
+    <>
+    <Navbar/>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-[#e6f7f7] to-white px-4">
+      <div className="flex flex-col md:flex-row bg-white rounded-2xl shadow-lg overflow-hidden max-w-4xl w-full">
+        
+        {/* Left Form Section */}
+        <div className="flex-1 p-8">
+          <h2 className="text-2xl font-bold text-center mb-2">Login Account</h2>
+          <p className="text-center text-sm text-gray-500 mb-6">
+            Don’t have an account?{' '}
+            <button
+              onClick={() => setShowModal(true)}
+              className="text-blue-500 hover:underline"
+            >
+              Sign Up
+            </button>
+          </p>
 
-        {error && <div className="bg-red-100 text-red-700 px-4 py-2 mb-4 rounded">{error}</div>}
-
-        <Formik
-          initialValues={{ email: '', password: '' }}
-          validationSchema={loginValidationSchema}
-          onSubmit={handleLogin}
-        >
-          {({ isSubmitting }) => (
-            <Form className="space-y-5">
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-600">Email Address</label>
-                <Field
-                  type="email"
-                  name="email"
-                  className="mt-1 w-full px-4 py-2 border rounded-lg shadow-sm"
-                />
-                <ErrorMessage name="email" component="div" className="text-red-600 text-sm mt-1" />
-              </div>
-
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-600">Password</label>
-                <Field
-                  type="password"
-                  name="password"
-                  className="mt-1 w-full px-4 py-2 border rounded-lg shadow-sm"
-                />
-                <ErrorMessage name="password" component="div" className="text-red-600 text-sm mt-1" />
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading || isSubmitting}
-                className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700"
-              >
-                {loading ? 'Logging in...' : 'Login'}
-              </button>
-            </Form>
+          {error && (
+            <div className="bg-red-100 text-red-700 px-4 py-2 mb-4 rounded">
+              {error}
+            </div>
           )}
-        </Formik>
 
-        <p className="mt-6 text-center text-sm text-gray-500">
-          Don't have an account?{' '}
-          <button onClick={() => setShowModal(true)} className="text-green-500 underline">
-            Sign Up
-          </button>
-        </p>
+          <Formik
+            initialValues={{ email: '', password: '' }}
+            validationSchema={loginValidationSchema}
+            onSubmit={handleLogin}
+          >
+            {({ isSubmitting }) => (
+              <Form className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-600">
+                    Email*
+                  </label>
+                  <Field
+                    type="email"
+                    name="email"
+                    placeholder="Enter your email"
+                    className="mt-1 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-400"
+                  />
+                  <ErrorMessage
+                    name="email"
+                    component="div"
+                    className="text-red-600 text-sm mt-1"
+                  />
+                </div>
 
-        <p className="mt-2 text-center text-sm text-blue-500 underline cursor-pointer" onClick={() => setShowForgot(true)}>
-          Forgot password?
-        </p>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600">
+                    Password*
+                  </label>
+                  <Field
+                    type="password"
+                    name="password"
+                    placeholder="Enter your password"
+                    className="mt-1 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-400"
+                  />
+                  <ErrorMessage
+                    name="password"
+                    component="div"
+                    className="text-red-600 text-sm mt-1"
+                  />
+                </div>
 
-        <AccountTypeModal isOpen={showModal} onClose={() => setShowModal(false)} onSelect={handleAccountSelect} />
+                <div className="flex justify-between items-center text-sm">
+                  <label className="flex items-center space-x-2">
+                    <input type="checkbox" className="w-4 h-4" />
+                    <span>Remember Me?</span>
+                  </label>
+                  <span
+                    onClick={() => setShowForgot(true)}
+                    className="text-blue-500 cursor-pointer hover:underline"
+                  >
+                    Forgot Password
+                  </span>
+                </div>
 
-        {showForgot && <ForgotPassword onClose={() => setShowForgot(false)} />}
+                <button
+                  type="submit"
+                  disabled={loading || isSubmitting}
+                  className="w-full bg-teal-500 text-white py-2 px-4 rounded-lg hover:bg-teal-600 transition"
+                >
+                  {loading ? 'Logging in...' : 'Login'}
+                </button>
+
+                {/* <button
+                  type="button"
+                  className="w-full bg-gray-100 flex items-center justify-center py-2 px-4 rounded-lg hover:bg-gray-200"
+                >
+                  <img
+                    src="https://www.svgrepo.com/show/355037/google.svg"
+                    alt="Google"
+                    className="w-5 h-5 mr-2"
+                  />
+                  Sign in with Google
+                </button> */}
+                
+              </Form>
+            )}
+          </Formik>
+        </div>
+
+        {/* Right Illustration Section */}
+        <div className="flex-1 hidden md:flex items-center justify-center bg-white p-6">
+          <img
+            src={loginIllustration}
+            alt="Login Illustration"
+            className="max-w-5xl"
+          />
+        </div>
       </div>
+
+      <AccountTypeModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        onSelect={handleAccountSelect}
+      />
+
+      {showForgot && <ForgotPassword onClose={() => setShowForgot(false)} />}
     </div>
+        </>
+
   );
 };
 

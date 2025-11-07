@@ -1,15 +1,13 @@
-// ProtectedRoute.jsx
-import { useSelector } from 'react-redux';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Outlet } from "react-router-dom";
 
-const UserProtectedRoute = ({ children }) => {
+const UserProtectedRoute = () => {
   const role = JSON.parse(localStorage.getItem("userdata") || "{}").role;
 
   if (role !== "User") {
     return <Navigate to="/" replace />;
   }
 
-  return children;
+  return <Outlet />; // renders nested routes
 };
 
 export default UserProtectedRoute;

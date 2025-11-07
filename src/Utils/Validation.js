@@ -35,3 +35,37 @@ export const userCredentialSchema = yup.object().shape({
     .required("Confirm your password"),
 });
 
+export const questionValidationSchema = yup.object({
+  fullName: yup.string()
+    .required("Full name is required")
+    .min(3, "Full name must be at least 3 characters")
+    .max(30, "Full name must be at most 30 characters"),
+  
+  age: yup.number()
+    .required("Age is required")
+    .min(13, "You must be at least 13")
+    .max(99, "You must be under 100"),
+  
+  gender: yup.string()
+    .required("Gender is required")
+    .max(6, "Gender must be less than 6 characters"),
+  
+  job: yup.string()
+    .required("Job is required"),
+  
+  relationshipStatus: yup.string()
+    .required("Relationship status is required"),
+  
+  country: yup.string()
+    .max(100, "Country name too long")
+    .nullable(),
+  
+  city: yup.string()
+    .max(100, "City name too long")
+    .nullable(),
+  
+  email: yup.string()
+    .required("Email is required")
+    .email("Invalid email format")
+});
+

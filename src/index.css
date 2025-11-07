@@ -1,9 +1,12 @@
+
 @import "tailwindcss";
 
+/* Calendar custom styles */
 .react-calendar__tile--active {
-  background: #a78bfa !important;
+  background: #a78bfa !important; /* active date color */
   color: white;
 }
+
 .react-calendar__tile--now {
-  background: #ddd6fe !important;
+  background: #ddd6fe !important; /* current date color */
 }

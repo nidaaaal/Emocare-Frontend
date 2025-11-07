@@ -2,11 +2,11 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://localhost:7237/api',
+  baseURL: 'https://emocare-backend-uavk.onrender.com/api',
   headers: {
     'Content-Type': 'application/json',
   },
-    withCredentials: true, // ✅ Add this to send cookies
+    withCredentials: true, 
 });
 
 export default api;
