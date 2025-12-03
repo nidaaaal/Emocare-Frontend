@@ -44,7 +44,7 @@ export default function ChatPage() {
       }
 
       const newConnection = new signalR.HubConnectionBuilder()
-        .withUrl("https://localhost:7237/chathub", {
+        .withUrl("https://emocare-backend-production.up.railway.app/chathub", {
           accessTokenFactory: () => token
         })
         .withAutomaticReconnect()
